@@ -168,6 +168,7 @@ footer {
   border-radius: 4px;
   background-color: rgba(26, 35, 126, 0.03);
   margin-bottom: 6px;
+  justify-content: space-between;
 }
 
 .participant-avatar {
@@ -192,6 +193,51 @@ footer {
   font-size: 12px;
   color: #666;
   margin-left: 6px;
+}
+
+.participant-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Ensure the name/email area expands and the remove button stays to the right */
+.participant-item .participant-info {
+  flex: 1 1 auto;
+}
+
+.participant-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.participant-remove svg {
+  display: block;
+  color: #c62828; /* use currentColor for stroke */
+}
+
+.participant-remove:focus {
+  outline: 2px solid rgba(198, 40, 40, 0.18);
+  outline-offset: 2px;
+}
+
+.participant-remove {
+  margin-left: 12px;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.participant-remove:hover {
+  background-color: rgba(198, 40, 40, 0.06);
 }
 
 .no-participants {

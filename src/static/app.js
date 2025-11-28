@@ -40,7 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (details.participants && details.participants.length > 0) {
           const list = document.createElement("ul");
           list.className = "participants-list";
-
+          // keep the activity name in a local const for use in closures
+          const activityName = name;
           details.participants.forEach((email) => {
             const li = document.createElement("li");
             li.className = "participant-item";
@@ -54,10 +55,56 @@ document.addEventListener("DOMContentLoaded", () => {
               .join(" ");
 
             li.innerHTML = `
-              <span class="participant-avatar">${displayName.charAt(0) || "?"}</span>
-              <span class="participant-name">${displayName}</span>
-              <span class="participant-email">${email}</span>
+              <div class="participant-info">
+                <span class="participant-avatar">${displayName.charAt(0) || "?"}</span>
+                <span class="participant-name">${displayName}</span>
+                <span class="participant-email">${email}</span>
+              </div>
+              <button class="participant-remove" title="Remove participant" aria-label="Remove ${displayName}" data-email="${email}">
+                <!-- Trash icon (SVG) -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M19 6l-1 14c-.1 1-1 2-2 2H8c-1 0-2-.9-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M10 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
             `;
+
+            // Add remove button behavior
+            const removeBtn = li.querySelector('.participant-remove');
+            removeBtn.addEventListener('click', async () => {
+              const confirmRemove = confirm(`Remove ${email} from ${activityName}?`);
+              if (!confirmRemove) return;
+
+              try {
+                const resp = await fetch(`/activities/${encodeURIComponent(activityName)}/signup?email=${encodeURIComponent(email)}`, {
+                  method: 'DELETE',
+                });
+
+                const data = await resp.json();
+                if (resp.ok) {
+                  messageDiv.textContent = data.message || 'Removed participant';
+                  messageDiv.className = 'message success';
+                  messageDiv.classList.remove('hidden');
+                  // Refresh activities to show change
+                  fetchActivities();
+                } else {
+                  messageDiv.textContent = data.detail || 'Failed to remove participant';
+                  messageDiv.className = 'message error';
+                  messageDiv.classList.remove('hidden');
+                }
+
+                // Hide message after 5s
+                setTimeout(() => { messageDiv.classList.add('hidden'); }, 5000);
+              } catch (err) {
+                console.error('Error removing participant:', err);
+                messageDiv.textContent = 'Failed to remove participant. Please try again.';
+                messageDiv.className = 'message error';
+                messageDiv.classList.remove('hidden');
+              }
+            });
 
             list.appendChild(li);
           });
